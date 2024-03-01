@@ -68,7 +68,7 @@ uploadSubmitButton.addEventListener("click", async function uploadFile(event) {
 
     request.addEventListener("abort", onClose);
 
-    request.open("POST", "http://localhost:3066/media/upload");
+    request.open("POST", "upload");
     request.send(formData);
     uploading = request;
 });
@@ -93,7 +93,7 @@ let fileActionFile = null;
 async function hydateFileList() {
     fileError.hidden = true;
     console.log("fetching files");
-    const data = await fetch("http://localhost:3066/media/list")
+    const data = await fetch("list")
         .then((response) => response.json())
         .catch((error) => {
             fileError.hidden = false;
@@ -151,7 +151,7 @@ fileActionsPublic.addEventListener("change", async () => {
     let publicValue = fileActionsPublic.checked;
     formData.append("public", publicValue);
     formData.append("filename", file.name);
-    const response = await fetch("http://localhost:3066/media/update_public", {
+    const response = await fetch("update_public", {
         method: "PUT",
         body: formData,
     });

@@ -1,6 +1,5 @@
 import datetime
-import json
-import time
+import config
 from flask import (
     Flask,
     abort,
@@ -16,12 +15,11 @@ import os
 from auth import auth, get_user
 from data import File, get_user_files, get_folder_size
 
-app = Flask(__name__, static_url_path="/media/static")
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024 * 1024
-prefix = "/media"
+app = Flask(__name__, static_url_path=config.prefix + "/static")
+app.config["MAX_CONTENT_LENGTH"] = config.max_upload_file_size_gb * 1024 * 1024 * 1024
 
 
-@app.route(prefix + "/")
+@app.route(config.prefix + "/")
 def home():
     user = get_user(abort_if_not_logged_in=False)
     if user is None:
@@ -29,7 +27,7 @@ def home():
     return render_template("index.html", username=user.username)
 
 
-@app.route(prefix + "/list")
+@app.route(config.prefix + "/list")
 def list_files():
     user = get_user()
     files = get_user_files(user.username)
@@ -52,7 +50,7 @@ def list_files():
     }
 
 
-@app.route(prefix + "/delete/<filename>", methods=["DELETE"])
+@app.route(config.prefix + "/delete/<filename>", methods=["DELETE"])
 def delete_file(filename):
     user = get_user()
     files = get_user_files(user.username)
@@ -63,7 +61,7 @@ def delete_file(filename):
     return "ok"
 
 
-@app.route(prefix + "/upload", methods=["POST"])
+@app.route(config.prefix + "/upload", methods=["POST"])
 def upload_file():
     user = get_user()
     # check if the post request has the file part
@@ -92,7 +90,7 @@ def upload_file():
     return "ok"
 
 
-@app.route(prefix + "/update_public", methods=["PUT"])
+@app.route(config.prefix + "/update_public", methods=["PUT"])
 def set_public():
     user = get_user()
     files = get_user_files(user.username)
@@ -105,7 +103,7 @@ def set_public():
     return "ok"
 
 
-@app.route(prefix + "/file/<owner>/<filename>")
+@app.route(config.prefix + "/file/<owner>/<filename>")
 def get_file(owner, filename):
     files = get_user_files(owner)
     if files is None:
@@ -124,13 +122,13 @@ def get_file(owner, filename):
     )
 
 
-# listen
+app.register_blueprint(auth, url_prefix=config.prefix + "/auth")
+
 if __name__ == "__main__":
+    if config.debug:
+        app.config["SERVER_NAME"] = f"localhost:{config.port}"
+        with app.app_context():
+            print(url_for("home"))
+            print(url_for("auth.dashboard.dashboard_page"))
 
-    app.config["SERVER_NAME"] = "localhost:3066"
-    app.register_blueprint(auth, url_prefix="/media/auth")
-    with app.app_context():
-        print(url_for("home"))
-        print(url_for("auth.dashboard.dashboard_page"))
-
-    app.run(port=3066, debug=True)
+    app.run(port=config.port, debug=config.debug)

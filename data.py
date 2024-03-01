@@ -45,14 +45,14 @@ users = DB("users")
 register_keys = DB("register_keys")
 files = {}
 
-os.makedirs("files", exist_ok=True)
+os.makedirs("media", exist_ok=True)
 
 
 def get_user_files(username):
     if username not in users:
         return None
     if username not in files:
-        files[username] = DB("files/" + username)
+        files[username] = DB("media/" + username)
     return files[username]
 
 

@@ -7,13 +7,6 @@
         {% block head %}{% endblock %}
     </head>
     <body>
-        <!-- <header>
-            <nav>
-                <a href="{{url_for('home')}}">Home</a>
-                <a href="{{url_for('auth.login')}}">Log In</a>
-                <a href="{{url_for('auth.api.logout')}}">Log Out</a>
-            </nav>
-        </header> -->
         <main class="content-centered"><div id="content">{% block content %}{% endblock %}</div></main>
         <div id="modals">{% block modals %}{% endblock %}</div>
     </body>

@@ -21,11 +21,11 @@ from data import (
     users,
     register_keys,
 )
+import config
 from apscheduler.schedulers.background import BackgroundScheduler
 
 auth_cookie_name = "mediaauth"
 default_storage = 5 * 1024 * 1024 * 1024
-cookie_max_days = 30
 
 
 auth = Blueprint("auth", __name__)
@@ -63,7 +63,7 @@ def create_session(username, password):
         return None
 
     session_id = sha256(os.urandom(64)).hexdigest()
-    expires = datetime.datetime.now() + datetime.timedelta(days=cookie_max_days)
+    expires = datetime.datetime.now() + datetime.timedelta(days=config.cookie_max_days)
     session = Session(username, session_id, expires)
     sessions[session_id] = session
     return session
@@ -149,7 +149,7 @@ def logout():
     return resp
 
 
-def get_user(abort_if_not_logged_in=True) -> UserData | None:
+def get_user(abort_if_not_logged_in=True) -> UserData:
     session_id = request.cookies.get(auth_cookie_name)
     if session_id not in sessions:
         return abort(403) if abort_if_not_logged_in else None
@@ -161,7 +161,7 @@ def get_user(abort_if_not_logged_in=True) -> UserData | None:
 
 def get_admin():
     user = get_user()
-    if user.username != admin:
+    if user.username != config.admin:
         abort(403)
     return user
 
@@ -225,15 +225,7 @@ auth.register_blueprint(dashboard, url_prefix="/dashboard")
 
 
 def make_admin():
-    if not os.path.exists("admin.txt"):
-        admin = input("Enter the admin username: ").strip()
-        with open("admin.txt", "w") as f:
-            f.write(admin)
-    else:
-        with open("admin.txt") as f:
-            admin = f.read()
-
-    if admin not in users:
+    if config.admin not in users:
         valid = False
         while not valid:
             password = input("Enter the admin password: ")
@@ -241,14 +233,12 @@ def make_admin():
             valid = password == confirm
         salt = sha256(os.urandom(64)).hexdigest()
         password_hash = sha256((password + salt).encode()).hexdigest()
-        users[admin] = User(
-            admin, password_hash, salt, UserData(admin, default_storage)
+        users[config.admin] = User(
+            config.admin, password_hash, salt, UserData(config.admin, default_storage)
         )
 
-    return admin
 
-
-admin = make_admin()
+make_admin()
 
 clear_expired()
 scheduler = BackgroundScheduler()
