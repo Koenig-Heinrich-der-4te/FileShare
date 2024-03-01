@@ -63,7 +63,9 @@ def create_session(username, password):
         return None
 
     session_id = sha256(os.urandom(64)).hexdigest()
-    expires = datetime.datetime.now() + datetime.timedelta(days=config.cookie_max_days)
+    expires = datetime.datetime.now() + datetime.timedelta(
+        days=config.session_cookie_max_days
+    )
     session = Session(username, session_id, expires)
     sessions[session_id] = session
     return session
