@@ -1,0 +1,13 @@
+{% extends "base.html" %} {% block head %}
+<title>Login Fail</title>
+{% endblock %} {% block content %}
+<div id="register-fail">
+    <h1>Login Failed</h1>
+    <p>Incorrect username or password. Please try again.</p>
+    <script>
+        setTimeout(() => {
+            window.location.href = "{{url_for('auth.login')}}";
+        }, 1500);
+    </script>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+input {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: x-large;
+    border-radius: 5px;
+    border: 2px solid #ccc;
+}
+
+label .field-info {
+    margin-bottom: -10px;
+    margin-left: 5px;
+}
+label .field-info .field-error {
+    display: none;
+}
+
+label:has(.field-info) {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+/* label.error .field-info {
+    color: red;
+} */
+label.error {
+    color: red;
+}
+
+label.error .field-info .field-error {
+    float: right;
+    display: block;
+    color: red;
+}
+
+label.error input {
+    border-color: red;
+}
+
+
+
+
+.mo-button {
+    border-radius: 5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border: none;
+    font-size: xx-large;
+    /* height: 2em; */
+}
+
+button.mo-button {
+    padding: 20px;
+}
+
+/* close */
+.close-button {
+    background-color: #777;
+    color: #fff;
+}
+
+.close-button:hover {
+    background-color: #666;
+}
+
+/* delete */
+.delete-button {
+    background-color: rgb(255, 0, 0);
+}
+
+.delete-button:hover {
+    background-color: rgb(230, 0, 0);
+}
+
+/* action-button*/
+.action-button {
+    /* height: 4em; */
+    background-color: #000;
+    color: #fff;
+}
+
+.action-button:hover {
+    background-color: #333;
+}
+
+
+/* misc-button */
+.misc-button {
+    background-color: #f0f0f0;
+}
+
+.misc-button:hover {
+    background-color: #e0e0e0;
+}
+
+.mo-button:disabled {
+    background-color: #ccc;
+    color: #888;
+    cursor: default;
+}
+
+
+.two-buttons {
+    display: grid;
+    column-gap: 5px;
+    grid-template-columns: 1fr 1fr;
+}

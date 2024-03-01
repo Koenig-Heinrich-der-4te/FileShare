@@ -1,0 +1,20 @@
+form {
+    display: grid;
+    grid-template-rows: repeat(3, 1fr);
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    font-size: large;
+    margin: 20px auto;
+    max-width: 30em;
+}
+
+button {
+    margin-top: 10px;
+}
+
+#register-info {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+}

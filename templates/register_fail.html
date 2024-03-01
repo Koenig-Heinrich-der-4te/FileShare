@@ -1,0 +1,11 @@
+{% extends "base.html" %} {% block head %}
+<title>Register Fail</title>
+{% endblock %} {% block content %}
+<div id="register-fail">
+    <h1>Registration Failed</h1>
+    <p>{{reason}}</p>
+    {% if reason != "Invalid register URL" %}
+    <button class="mo-button action-button" onclick="window.location.href = '{{return_url}}'">Try Again</button>
+    {% endif %}
+</div>
+{% endblock %}

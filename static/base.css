@@ -1,0 +1,31 @@
+body {
+    background-color: #f0f0f0;
+    font-family: sans-serif;
+    margin-top: 0;
+}
+
+.content-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#content {
+    width: 100%;
+    max-width: 80em;
+    background-color: rgb(230, 230, 230);
+    min-height: calc(99vh - 40px);
+    /* height: 99vh; */
+    padding: 20px;
+}
+
+dialog {
+    width: 90%;
+    max-width: 30em;
+    height: calc(fit-content + 5%);
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    font-size: xx-large;
+}

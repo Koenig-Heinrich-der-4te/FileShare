@@ -1,0 +1,6 @@
+stuff
+admin.txt
+media
+files
+*.pickle
+__pycache__

@@ -1,0 +1,87 @@
+{% extends "base.html" %} {% block head %}
+<title>Register</title>
+<meta content="Register ac account" property="og:title" />
+<meta content="Upload and Share files by signing up using this link" property="og:description" />
+<link rel="stylesheet" href="{{url_for('static', filename='register.css')}}" />
+{% endblock %} {% block content %}
+<div class="content-centered"><h1>Register</h1></div>
+<form id="register-form" action="{{url_for('auth.api.register')}}" method="post">
+    <label for="register-username">
+        <span class="field-info">Username <span class="field-error">Username required</span></span>
+        <input type="text" id="username" name="username" />
+    </label>
+
+    <label for="register-password" class="error">
+        <span class="field-info">Password <span class="field-error">Password required</span></span>
+        <input type="password" id="password" name="password" />
+    </label>
+
+    <label for="register-confirm-password">
+        <span class="field-info">Confirm Password <span class="field-error">Passwords must match</span></span>
+        <input type="password" id="confirm-password" name="confirm-password" />
+    </label>
+
+    <input type="hidden" name="register-key" value="{{register_key}}" />
+
+    <button id="register-submit" class="mo-button action-button" type="submit">Register</button>
+</form>
+
+<script>
+    const submitButton = document.getElementById("register-submit");
+    const usernameInput = document.getElementById("username");
+    let usernameErrorEnabled = false;
+    usernameInput.addEventListener("focusout", () => (usernameErrorEnabled = true));
+    usernameInput.addEventListener("input", (event) => {
+        const allowed = "abcdefghijklmnopqrstuvwxyz0123456789_-";
+        const value = usernameInput.value.toLowerCase();
+        const newValue = value
+            .split("")
+            .filter((char) => allowed.includes(char))
+            .join("");
+        if (usernameInput.value !== newValue) {
+            const selection = [usernameInput.selectionStart, usernameInput.selectionEnd];
+            usernameInput.value = newValue;
+            usernameInput.setSelectionRange(selection[0] - 1, selection[1] - 1);
+        }
+    });
+    const passwordInput = document.getElementById("password");
+    let passwordErrorEnabled = false;
+    passwordInput.addEventListener("focusout", () => (passwordErrorEnabled = true));
+    const confirmPasswordInput = document.getElementById("confirm-password");
+    let confirmPasswordErrorEnabled = false;
+    confirmPasswordInput.addEventListener("focusout", () => (confirmPasswordErrorEnabled = true));
+
+    [usernameInput, passwordInput, confirmPasswordInput].forEach((input) => {
+        input.addEventListener("input", () => validateForm());
+        input.addEventListener("focusout", () => validateForm());
+    });
+
+    function validateForm() {
+        let hasError = false;
+        if (usernameInput.value === "") {
+            if (usernameErrorEnabled) usernameInput.parentElement.classList.add("error");
+            hasError = true;
+        } else {
+            usernameInput.parentElement.classList.remove("error");
+        }
+
+        if (passwordInput.value === "") {
+            if (passwordErrorEnabled) passwordInput.parentElement.classList.add("error");
+            hasError = true;
+        } else {
+            passwordInput.parentElement.classList.remove("error");
+        }
+
+        if (confirmPasswordInput.value === "" || confirmPasswordInput.value !== passwordInput.value) {
+            if (confirmPasswordErrorEnabled) confirmPasswordInput.parentElement.classList.add("error");
+            hasError = true;
+        } else {
+            confirmPasswordInput.parentElement.classList.remove("error");
+        }
+
+        submitButton.disabled = hasError;
+    }
+
+    validateForm();
+</script>
+{% endblock %}
