@@ -11,6 +11,7 @@ from flask import (
 )
 from hashlib import sha256
 from data import (
+    ResetPasswordKey,
     UserData,
     User,
     Session,
@@ -20,6 +21,7 @@ from data import (
     sessions,
     users,
     register_keys,
+    reset_password_keys,
 )
 import config
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -49,7 +51,7 @@ def login_api():
         return render_template("login_fail.html")
 
     resp = make_response(redirect(url_for("home")))
-    resp.set_cookie(auth_cookie_name, session.session_id, expires=session.expires)
+    resp.set_cookie(auth_cookie_name, session.session_id, httponly=True)
     return resp
 
 
@@ -64,7 +66,7 @@ def create_session(username, password):
 
     session_id = sha256(os.urandom(64)).hexdigest()
     expires = datetime.datetime.now() + datetime.timedelta(
-        days=config.session_cookie_max_days
+        days=config.session_cookie_expiry_days
     )
     session = Session(username, session_id, expires)
     sessions[session_id] = session
@@ -138,6 +140,8 @@ def clear_expired():
         clear(sessions)
     with register_keys:
         clear(register_keys)
+    with reset_password_keys:
+        clear(reset_password_keys)
     print("Cleared expired")
 
 
@@ -151,19 +155,88 @@ def logout():
     return resp
 
 
+@auth.route("/reset-password")
+def reset_password_page():
+    user = get_user(False)
+    if user is None:
+        return redirect(url_for("auth.login"))
+    return render_template("reset_password.html", reset_key=None)
+
+
+@auth.route("/reset-password/<reset_key>")
+def reset_password_with_key_page(reset_key):
+    if reset_key not in reset_password_keys:
+        return render_template(
+            "reset_password_fail.html",
+            reason="Reset key not found please request a new one",
+        )
+    return render_template("reset_password.html", reset_key=reset_key)
+
+
+@api.route("/reset-password", methods=["POST"])
+def reset_password():
+    reset_key = request.form.get("reset-key")
+    old_password = request.form.get("password")
+    new_password = request.form.get("new-password")
+
+    if not new_password or (not old_password and not reset_key):
+        return render_template("reset_password_fail.html", reason="Invalid request")
+
+    if old_password:
+        user = users[get_user().username]
+        if (
+            sha256((old_password + user.salt).encode()).hexdigest()
+            != user.password_hash
+        ):
+            return render_template(
+                "reset_password_fail.html", reason="Invalid password"
+            )
+    elif reset_key:
+        if reset_key not in reset_password_keys:
+            return render_template(
+                "reset_password_fail.html",
+                reason="Reset key not found please request a new one",
+            )
+        user = users[reset_password_keys[reset_key].username]
+    with users:
+        user.salt = sha256(os.urandom(64)).hexdigest()
+        user.password_hash = sha256((new_password + user.salt).encode()).hexdigest()
+    # discard all sessions
+    with sessions:
+        for session in list(sessions.values()):
+            if session.username == user.username:
+                del sessions[session.session_id]
+    if reset_key:
+        del reset_password_keys[reset_key]
+    return logout()
+
+
 def get_user(abort_if_not_logged_in=True) -> UserData:
     session_id = request.cookies.get(auth_cookie_name)
     if session_id not in sessions:
         return abort(403) if abort_if_not_logged_in else None
-    return users[sessions[session_id].username].data
+    session = sessions[session_id]
+    # refresh the session cookie
+    if session.expires - datetime.datetime.now() < datetime.timedelta(
+        days=config.session_cookie_expiry_days - 1
+    ):
+        with sessions:
+            session.expires = datetime.datetime.now() + datetime.timedelta(
+                days=config.session_cookie_expiry_days
+            )
+    return users[session.username].data
 
 
 # dashboard
 
 
+def is_admin(user):
+    return user.username == config.admin
+
+
 def get_admin():
     user = get_user()
-    if user.username != config.admin:
+    if not is_admin(user):
         abort(403)
     return user
 
@@ -216,10 +289,26 @@ def list_users():
 def create_register_link():
     admin = get_admin()
     key = sha256(os.urandom(64)).hexdigest()
-    expires = datetime.datetime.now() + datetime.timedelta(days=7)
+    expires = datetime.datetime.now() + datetime.timedelta(
+        days=config.register_key_expiry_days
+    )
     storage = int(request.form.get("storage"))
     register_keys[key] = RegisterKey(key, expires, storage)
     return url_for("auth.register_page", register_key=key)
+
+
+@dashboard.route("/create-reset-password-link", methods=["POST"])
+def create_reset_password_link():
+    admin = get_admin()
+    username = request.form.get("username")
+    if username not in users:
+        return "User not found"
+    key = sha256(os.urandom(64)).hexdigest()
+    expires = datetime.datetime.now() + datetime.timedelta(
+        days=config.reset_key_expiry_days
+    )
+    reset_password_keys[key] = ResetPasswordKey(key, expires, username)
+    return url_for("auth.reset_password_with_key_page", reset_key=key)
 
 
 auth.register_blueprint(api, url_prefix="/api")

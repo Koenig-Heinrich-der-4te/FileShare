@@ -1,6 +1,7 @@
 form {
     display: grid;
-    grid-template-rows: repeat(3, 1fr);
+    /* grid-template-rows: repeat(3, 1fr); */
+    grid-template-columns: 1fr;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     padding: 20px;
@@ -13,8 +14,13 @@ button {
     margin-top: 10px;
 }
 
-#register-info {
+.clickable {
     color: blue;
     text-decoration: underline;
     cursor: pointer;
+}
+
+#register-close-button, #reset-close-button {
+    padding: 20px 50px;
+    float: right;
 }

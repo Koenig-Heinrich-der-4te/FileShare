@@ -33,6 +33,13 @@ class RegisterKey:
 
 
 @dataclass
+class ResetPasswordKey:
+    key: str
+    expires: datetime.datetime
+    username: str
+
+
+@dataclass
 class File:
     filename: str
     upload_date: datetime.datetime
@@ -43,6 +50,7 @@ class File:
 sessions = DB("sessions")
 users = DB("users")
 register_keys = DB("register_keys")
+reset_password_keys = DB("reset_password_keys")
 files = {}
 
 os.makedirs("media", exist_ok=True)

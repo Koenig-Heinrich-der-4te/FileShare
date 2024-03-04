@@ -1,13 +1,13 @@
 input {
     margin-bottom: 10px;
-    padding: 10px;
+    padding: 15px 10px;
     font-size: x-large;
     border-radius: 5px;
     border: 2px solid #ccc;
 }
 
 label .field-info {
-    margin-bottom: -10px;
+    /* margin-bottom: -10px; */
     margin-left: 5px;
 }
 label .field-info .field-error {
@@ -19,9 +19,6 @@ label:has(.field-info) {
     grid-template-columns: 1fr;
 }
 
-/* label.error .field-info {
-    color: red;
-} */
 label.error {
     color: red;
 }
@@ -36,8 +33,9 @@ label.error input {
     border-color: red;
 }
 
-
-
+.right {
+    float: right
+}
 
 .mo-button {
     border-radius: 5px;
@@ -110,3 +108,18 @@ button.mo-button {
     column-gap: 5px;
     grid-template-columns: 1fr 1fr;
 }
+
+.link-copy.copied {
+    background-color: rgb(70, 202, 63);
+    transition: all 0.1s ease-out;
+}
+
+.link-copy.copied:hover {
+    background-color: rgb(80, 215, 73);
+}
+
+.link-copy:not(.copied) .svg-copied,
+.link-copy.copied .svg-copy {
+    display: none;
+}
+

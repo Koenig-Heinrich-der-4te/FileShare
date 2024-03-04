@@ -51,12 +51,33 @@ confirmDeleteYes.addEventListener("click", async () => {
     userOptionsDialog.close();
     await updateUsers();
 });
+const userOptionsResetPassword = document.getElementById("user-options-reset-password");
+
+const copyResetPasswordDialog = document.getElementById("copy-reset-password-link-dialog");
+const resetPasswordLink = document.getElementById("reset-link-display");
+const copyResetPasswordLink = document.getElementById("reset-link-copy");
+userOptionsResetPassword.addEventListener("click", async () => {
+    const data = new FormData();
+    data.append("username", selectedUser.name);
+    const res = await fetch("create-reset-password-link", { method: "POST", body: data });
+    if (!res.ok) {
+        return;
+    }
+    const link = await res.text();
+    resetPasswordLink.textContent = window.location.origin + link;
+    copyResetPasswordDialog.showModal();
+});
+copyResetPasswordLink.addEventListener("click", () => {
+    navigator.clipboard.writeText(resetPasswordLink.textContent);
+    if (!copyResetPasswordLink.classList.contains("copied")) setTimeout(() => copyResetPasswordLink.classList.remove("copied"), 800);
+    copyResetPasswordLink.classList.add("copied");
+});
 
 const createRegisterLinkDialog = document.getElementById("create-register-link-dialog");
 const createRegisterLinkButton = document.getElementById("register-link-create");
 const createRegisterAllocated = document.getElementById("register-link-allocated");
 const registerLinkSection = document.getElementById("register-link-section");
-const registerLink = document.getElementById("link-display");
+const registerLink = document.getElementById("register-link-display");
 const registerLinkCopy = document.getElementById("register-link-copy");
 createRegisterLinkButton.addEventListener("click", async () => {
     const form = new FormData();

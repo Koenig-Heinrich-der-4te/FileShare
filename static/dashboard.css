@@ -30,30 +30,21 @@ input {
     border-radius: 5px;
 }
 
-#register-link-copy.copied {
-    background-color: rgb(70, 202, 63);
-    transition: all 0.1s ease-out;
-}
-
-#register-link-copy.copied:hover {
-    background-color: rgb(80, 215, 73);
-}
-
-#register-link-copy:not(.copied) #svg-copied,
-#register-link-copy.copied #svg-copy {
-    display: none;
-}
-
-#register-link-section-alignment {
+.link-section-alignment {
     display: grid;
     grid-template-columns: 5fr 1fr;
     column-gap: 10px;
 }
 
-#link-display {
+.link-display {
     display: flex;
     align-items: center;
     font-size: smaller;
     white-space: nowrap;
     overflow: auto;
+}
+
+#user-options-options{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 }

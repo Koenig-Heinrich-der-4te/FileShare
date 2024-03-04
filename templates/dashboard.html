@@ -1,9 +1,32 @@
 {% extends "base.html" %} {% block head %}
 <title>Dashboard</title>
 <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}" />
+<link rel="stylesheet" href="{{url_for('static', filename='hamburger.css')}}" />
 <script src="{{url_for('static', filename='dashboard.js')}}" defer></script>
 {% endblock %} {% block content %}
-<button class="mo-button action-button" onclick="createRegisterLinkDialog.showModal()">Register</button>
+<label id="hamburger">
+    <input type="checkbox" id="hamburger-switch" />
+    <div id="hamburger-content">
+        <div id="hamburger-menu">
+            <a href="{{url_for('home')}}">Home</a>
+            <a href="{{url_for('auth.api.logout')}}">Logout</a>
+            <a href="{{url_for('auth.reset_password_page')}}">Change Password</a>
+        </div>
+        <svg id="hamburger-svg" viewBox="0 0 100 80" width="2em" height="2em">
+            <rect width="100" height="20" rx="10"></rect>
+            <rect y="30" width="100" height="20" rx="10"></rect>
+            <rect y="60" width="100" height="20" rx="10"></rect>
+        </svg>
+    </div>
+
+    <script>
+        document.getElementById("hamburger-switch").checked = false;
+    </script>
+</label>
+<div class="content-centered">
+    <h1>Dashboard</h1>
+</div>
+<button class="mo-button action-button right" onclick="createRegisterLinkDialog.showModal()">Register</button>
 <table id="user-list">
     <header>
         <tr>
@@ -20,14 +43,47 @@
     <div class="content-centered">
         <h2 id="user-options-name"></h2>
     </div>
-    <div>
-        <label for="user-options-allocated">Allocated</label>
-        <input type="text" id="user-options-allocated" />
+    <div id="user-options-options">
+        <div>
+            <label for="user-options-allocated">Allocated</label>
+            <input type="text" id="user-options-allocated" />
+        </div>
+        <button id="user-options-reset-password" class="mo-button misc-button">Reset Password Link</button>
     </div>
     <div id="user-options-buttons" class="two-buttons">
         <button id="user-options-delete" class="mo-button delete-button">Delete</button>
         <button id="user-options-close" class="mo-button close-button" onclick="userOptionsDialog.close()">Close</button>
     </div>
+</dialog>
+
+<dialog id="copy-reset-password-link-dialog">
+    <div class="content-centered"><h2>Copy reset link</h2></div>
+    <div class="link-section-alignment">
+        <div id="reset-link-display" class="link-display"></div>
+        <button id="reset-link-copy" class="mo-button link-copy">
+            <svg class="svg-copy" width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M15.197 3.35462C16.8703 1.67483 19.4476 1.53865 20.9536 3.05046C22.4596 4.56228 22.3239 7.14956 20.6506 8.82935L18.2268 11.2626M10.0464 14C8.54044 12.4882 8.67609 9.90087 10.3494 8.22108L12.5 6.06212"
+                    stroke="#1C274C"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                />
+                <path
+                    d="M13.9536 10C15.4596 11.5118 15.3239 14.0991 13.6506 15.7789L11.2268 18.2121L8.80299 20.6454C7.12969 22.3252 4.55237 22.4613 3.0464 20.9495C1.54043 19.4377 1.67609 16.8504 3.34939 15.1706L5.77323 12.7373"
+                    stroke="#1C274C"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                />
+            </svg>
+            <svg class="svg-copied" fill="#000000" width="1em" height="1em" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M28.998 8.531l-2.134-2.134c-0.394-0.393-1.030-0.393-1.423 0l-12.795 12.795-6.086-6.13c-0.393-0.393-1.029-0.393-1.423 0l-2.134 2.134c-0.393 0.394-0.393 1.030 0 1.423l8.924 8.984c0.393 0.393 1.030 0.393 1.423 0l15.648-15.649c0.393-0.392 0.393-1.030 0-1.423z"
+                ></path>
+            </svg>
+        </button>
+    </div>
+    <br />
+    <button id="reset-link-close" class="mo-button close-button right" onclick="copyResetPasswordDialog.close()">Close</button>
 </dialog>
 
 <dialog id="confirm-delete-dialog">
@@ -51,10 +107,10 @@
         <button id="register-link-close" class="mo-button close-button" onclick="createRegisterLinkDialog.close()">Close</button>
     </div>
     <div id="register-link-section" hidden>
-        <div id="register-link-section-alignment">
-            <div id="link-display"></div>
-            <button id="register-link-copy" class="mo-button">
-                <svg id="svg-copy" width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="link-section-alignment">
+            <div id="register-link-display" class="link-display"></div>
+            <button id="register-link-copy" class="mo-button link-copy">
+                <svg class="svg-copy" width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M15.197 3.35462C16.8703 1.67483 19.4476 1.53865 20.9536 3.05046C22.4596 4.56228 22.3239 7.14956 20.6506 8.82935L18.2268 11.2626M10.0464 14C8.54044 12.4882 8.67609 9.90087 10.3494 8.22108L12.5 6.06212"
                         stroke="#1C274C"
@@ -68,8 +124,7 @@
                         stroke-linecap="round"
                     />
                 </svg>
-                <svg id="svg-copied" fill="#000000" width="1em" height="1em" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                    <title>checkmark2</title>
+                <svg class="svg-copied" fill="#000000" width="1em" height="1em" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
                     <path
                         d="M28.998 8.531l-2.134-2.134c-0.394-0.393-1.030-0.393-1.423 0l-12.795 12.795-6.086-6.13c-0.393-0.393-1.029-0.393-1.423 0l-2.134 2.134c-0.393 0.394-0.393 1.030 0 1.423l8.924 8.984c0.393 0.393 1.030 0.393 1.423 0l15.648-15.649c0.393-0.392 0.393-1.030 0-1.423z"
                     ></path>

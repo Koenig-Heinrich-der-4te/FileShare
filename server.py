@@ -7,12 +7,11 @@ from flask import (
     redirect,
     send_from_directory,
     url_for,
-    make_response,
     render_template,
 )
 from werkzeug.utils import secure_filename
 import os
-from auth import auth, get_user
+from auth import auth, get_user, is_admin
 from data import File, get_user_files, get_folder_size
 
 app = Flask(__name__, static_url_path=config.prefix + "/static")
@@ -24,7 +23,9 @@ def home():
     user = get_user(abort_if_not_logged_in=False)
     if user is None:
         return redirect(url_for("auth.login"))
-    return render_template("index.html", username=user.username)
+    return render_template(
+        "index.html", username=user.username, is_admin=is_admin(user)
+    )
 
 
 @app.route(config.prefix + "/list")

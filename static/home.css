@@ -40,37 +40,6 @@ h1 {
     /* font-size: xx-large; */
 }
 
-/* @media only screen and (min-width: 600px) {
-    #select-file-button {
-        height: 2.5em;
-        font-size: large;
-    }
-
-    #upload button {
-        height: 2em;
-        font-size: large;
-    }
-
-    #request-upload {
-        height: 2em;
-        font-size: large;
-        width: fit-content;
-    }
-
-    #upload-progress {
-        height: 2em;
-        
-    }
-} */
-/* 
-#content {
-    width: 100%;
-    max-width: 80em;
-    background-color: rgb(230, 230, 230);
-    height: 99vh;
-    padding: 20px;
-} */
-
 #file-list {
     width: 100%;
     /* max-width: 0em; */
@@ -138,28 +107,9 @@ td:not(:nth-child(1)) {
     background-color: rgb(59, 133, 183);
 }
 
-#file-actions-copy.copied {
-    background-color: rgb(70, 202, 63);
-    transition: all 0.1s ease-out;
-}
-
-#file-actions-copy.copied:hover {
-    background-color: rgb(80, 215, 73);
-}
-
-#file-actions-copy.copied #svg-copy {
-    display: none;
-}
-
-#file-actions-copy:not(.copied) #svg-copied {
-    display: none;
-}
-
 #file-actions-delete, #file-actions-download, #file-actions-copy, #file-actions-close {
     font-size: xx-large;
 }
-
-
 
 #remaining-storage-info {
     float: right;

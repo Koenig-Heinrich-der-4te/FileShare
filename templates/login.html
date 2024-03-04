@@ -1,6 +1,7 @@
 {% extends "base.html" %} {% block head %}
 <title>Log In</title>
 <link rel="stylesheet" href="{{url_for('static', filename='login.css')}}" />
+<script src="{{url_for('static', filename='form.js')}}"></script>
 {% endblock %} {% block content %}
 <div class="content-centered"><h1>Log in</h1></div>
 <form action="{{url_for('auth.api.login_api')}}" method="post">
@@ -8,38 +9,34 @@
         <span class="field-info">Username</span>
         <input id="username" type="text" name="username" placeholder="Username" required />
     </label>
+
     <label for="password">
         <span class="field-info">Password</span>
         <input id="password" type="password" name="password" placeholder="Password" required />
     </label>
+
     <button id="login-submit" class="mo-button action-button" type="submit">Log In</button>
-    <p>Don't have an account yet? Find out how to <span id="register-info" onclick="document.getElementById('register-dialog').showModal()">Register</span>!</p>
+    <div>
+        <p>Forgot password? <span class="clickable" onclick="document.getElementById('reset-dialog').showModal()">Reset</span> your password!</p>
+        <p>
+            Don't have an account yet? Find out how to <span class="clickable" onclick="document.getElementById('register-dialog').showModal()">Register</span>!
+        </p>
+    </div>
 </form>
 
 <script>
-    const submitButton = document.getElementById("login-submit");
-    const usernameInput = document.getElementById("username");
-    const passwordInput = document.getElementById("password");
-
-    [usernameInput, passwordInput].forEach((input) => {
-        input.addEventListener("input", () => validateForm());
-    });
-
-    function validateForm() {
-        if (usernameInput.value === "" || passwordInput.value === "") {
-            submitButton.disabled = true;
-        } else {
-            submitButton.disabled = false;
-        }
-    }
-
-    validateForm();
+    submitButton("login-submit", requiredInput("username"), requiredInput("password"));
 </script>
 {% endblock %} {% block modals %}
 <dialog id="register-dialog">
     <h2>How to register</h2>
     <p>To register, you need to contact the administrator of this website. They will provide you with a link to register your account.</p>
     <p>If you do not know who the administrator, you cannot register an account.</p>
-    <button class="mo-button close-button" onclick="document.getElementById('register-dialog').close()">Ok</button>
+    <button id="register-close-button" class="mo-button close-button" onclick="this.parentElement.close()">Ok</button>
+</dialog>
+<dialog id="reset-dialog">
+    <h2>How to reset your password</h2>
+    <p>To reset your password, you need to contact the administrator of this website. They will provide you with a link to reset your password.</p>
+    <button id="reset-close-button" class="mo-button close-button" onclick="this.parentElement.close()">Ok</button>
 </dialog>
 {% endblock %}
