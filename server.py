@@ -131,5 +131,6 @@ if __name__ == "__main__":
         with app.app_context():
             print(url_for("home"))
             print(url_for("auth.dashboard.dashboard_page"))
-
-    app.run(port=config.port, debug=config.debug)
+        app.config["SERVER_NAME"] = None
+    host = "0.0.0.0" if config.debug else None
+    app.run(host=host, port=config.port, debug=config.debug)
