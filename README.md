@@ -15,4 +15,4 @@ For useres to create an account they need to be handed a registration link, whic
 3. configure `config.py`
 4. Launch the server by running `server.py`
 5. create an admin account by entering and confirming the admin password if requested
-6. install an
+6. install a production WSGI server such as gunicorn (or ignore flask's complaints)

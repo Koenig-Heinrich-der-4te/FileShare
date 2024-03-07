@@ -122,7 +122,7 @@ async function hydateFileList() {
         let filetype = entry.name.split(".").pop().slice(0, 7).toLowerCase();
         let created = new Date(entry.created * 1000).toLocaleDateString();
         item.innerHTML = `
-        <td title="${name}">${truncatedFilename}</td>
+        <td title="${entry.name}">${truncatedFilename}</td>
         <td>${filetype}</td>
         <td>${filesizeToString(entry.size)}</td>
         <td>${created}</td>
@@ -131,7 +131,7 @@ async function hydateFileList() {
             fileActions.showModal();
             fileActionFile = entry;
             fileActionsFilename.textContent = truncatedFilename;
-            fileActionsFilename.title = name;
+            fileActionsFilename.title = entry.name;
             fileActionsSize.textContent = filesizeToString(entry.size);
             fileActionsUploadedDate.textContent = created;
             fileActionsPublic.classList.add("slider-no-transition");

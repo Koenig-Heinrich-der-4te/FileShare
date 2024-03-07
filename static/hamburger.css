@@ -3,15 +3,12 @@
     font-size: x-large;
 }
 
-#hamburger-switch {
-    display: none;
-}
-
 #hamburger-svg  {
     transition: transform 0.2s;
 }
-#hamburger:hover #hamburger-content #hamburger-svg,
-#hamburger-switch:checked + #hamburger-content #hamburger-svg {
+
+#hamburger:hover #hamburger-svg,
+#hamburger.active #hamburger-svg {
     transform: translate(0.7em, 0.4em) rotate(90deg);
 }
 
@@ -29,8 +26,8 @@
     background-color: #ddd;
 }
 
-#hamburger:hover #hamburger-content #hamburger-menu,
-#hamburger-switch:checked + #hamburger-content #hamburger-menu{
+#hamburger:hover #hamburger-menu,
+#hamburger.active #hamburger-menu{
     display: inherit;
 }
 
