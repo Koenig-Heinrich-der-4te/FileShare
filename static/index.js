@@ -15,62 +15,74 @@ const uploadProgressInfoDiv = document.getElementById("progress-info");
 const uploadProgress = document.getElementById("upload-progress");
 const uploadProgressText = document.getElementById("upload-progress-text");
 const uploadOptionsPublic = document.getElementById("upload-options-public-checkbox");
-uploadSubmitButton.addEventListener("click", async function uploadFile(event) {
-    // event.preventDefault();
+uploadSubmitButton.addEventListener("click", async function uploadFile() {
+    if (uploading) return;
 
-    if (uploading) {
-        uploading.abort();
-        return;
-    }
-
-    const file = fileupload.files[0];
-    if (!file) {
-        selectFileButton.focus();
-        return;
-    }
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("public", uploadOptionsPublic.checked);
-    const request = new XMLHttpRequest();
-    request.upload.addEventListener("progress", (event) => {
-        if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            uploadProgress.value = percent;
-            uploadProgressText.textContent = percent + "%";
-        }
-    });
-    uploadProgressInfoDiv.hidden = false;
-    uploadOptionsSection.hidden = true;
-    fileupload.disabled = true;
-
-    function onClose() {
+    const onClose = () => {
         uploading = null;
         uploadProgress.value = 0;
         uploadProgressText.textContent = "0%";
         uploadProgressInfoDiv.hidden = true;
         uploadOptionsSection.hidden = false;
         fileupload.disabled = false;
+    };
+    uploading = { abort: onClose };
+
+    const file = fileupload.files[0];
+    const fileData = new FormData();
+    fileData.append("filename", file.name);
+    fileData.append("public", uploadOptionsPublic.checked);
+    fileData.append("size", file.size);
+    const response = await fetch("init-upload", {
+        method: "POST",
+        body: fileData,
+    });
+
+    if (!response.ok) {
+        alert("Error uploading file");
+        return;
     }
 
-    request.addEventListener("readystatechange", () => {
-        if (request.readyState === 4) {
-            uploadDialog.close();
-            hydateFileList();
-            onClose();
+    const { chunkSize, uploadId } = await response.json();
+    uploadProgressInfoDiv.hidden = false;
+    uploadOptionsSection.hidden = true;
+    fileupload.disabled = true;
+
+    const uploadChunk = async (chunkNum) => {
+        const chunk = file.slice(chunkNum * chunkSize, (chunkNum + 1) * chunkSize);
+        const response = await fetch("upload-chunk?" + new URLSearchParams({ id: uploadId, cn: chunkNum }), {
+            method: "POST",
+            body: chunk,
+        });
+        return response.ok;
+    };
+
+    const chunkCount = Math.ceil(file.size / chunkSize);
+    let chunks = Array(chunkCount).fill(false);
+    const uploadChunks = async () => {
+        for (let i = 0; i < chunkCount && uploading; i++) {
+            if (chunks[i]) {
+                continue;
+            }
+            chunks[i] = true;
+            const success = await uploadChunk(i);
+            if (!success) {
+                alert("Error uploading file");
+                onClose();
+                return;
+            }
+
+            uploadProgress.value = Math.round((chunks.filter(Boolean).length / chunkCount) * 100);
+            uploadProgressText.textContent = uploadProgress.value + "%";
         }
-    });
+    };
+    // upload in parallel
+    const uploaders = Array.from({ length: 4 }, () => uploadChunks());
+    await Promise.all(uploaders);
 
-    request.addEventListener("error", () => {
-        alert("Error uploading file");
-        uploadDialog.close();
-        onClose();
-    });
-
-    request.addEventListener("abort", onClose);
-
-    request.open("POST", "upload");
-    request.send(formData);
-    uploading = request;
+    onClose();
+    uploadDialog.close();
+    hydateFileList();
 });
 
 const cancelUploadButton = document.getElementById("cancel-upload-button");
@@ -92,7 +104,6 @@ const maxStorageInfo = document.getElementById("max-storage");
 let fileActionFile = null;
 async function hydateFileList() {
     fileError.hidden = true;
-    console.log("fetching files");
     const data = await fetch("list")
         .then((response) => response.json())
         .catch((error) => {
@@ -105,7 +116,6 @@ async function hydateFileList() {
         return;
     }
     const { files, remaining_storage, max_storage } = data;
-    console.log(Object.keys(files).length);
     if (Object.keys(files).length === 0) {
         fileError.hidden = false;
         fileError.textContent = "No Files";

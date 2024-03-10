@@ -47,10 +47,20 @@ class File:
     public: bool
 
 
+@dataclass
+class Fileupload:
+    id: int
+    filename: str
+    size: int
+    public: bool
+    received_chunks: list
+
+
 sessions = DB("sessions")
 users = DB("users")
 register_keys = DB("register_keys")
 reset_password_keys = DB("reset_password_keys")
+fileuploads = {}
 files = {}
 
 os.makedirs("media", exist_ok=True)

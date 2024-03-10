@@ -12,10 +12,9 @@ from flask import (
 from werkzeug.utils import secure_filename
 import os
 from auth import auth, get_user, is_admin
-from data import File, get_user_files, get_folder_size
+from data import File, Fileupload, get_user_files, get_folder_size, fileuploads
 
 app = Flask(__name__, static_url_path=config.prefix + "/static")
-app.config["MAX_CONTENT_LENGTH"] = config.max_upload_file_size_gb * 1024 * 1024 * 1024
 
 
 @app.route(config.prefix + "/")
@@ -62,33 +61,89 @@ def delete_file(filename):
     return "ok"
 
 
-@app.route(config.prefix + "/upload", methods=["POST"])
-def upload_file():
-    user = get_user()
-    # check if the post request has the file part
-    if "file" not in request.files:
-        return abort(400)
-    file = request.files["file"]
-    if file.filename == "":
-        return abort(400)
-    filename = secure_filename(file.filename)
-    files = get_user_files(user.username)
-    if filename in files:
-        delete_file(filename)
+def abort_fileupload(user):
+    if user.username in fileuploads:
+        os.remove(
+            os.path.join(
+                "media", user.username, "temp", fileuploads[user.username].filename
+            )
+        )
+        del fileuploads[user.username]
 
-    os.makedirs(os.path.join("media", user.username), exist_ok=True)
-    file_path = os.path.join("media", user.username, filename)
-    file.save(file_path)
-    # check if the file is too large
-    size = os.path.getsize(file_path)
-    if user.dedicated_storage < get_folder_size(files) + size:
-        os.remove(file_path)
-        return abort(413)
-    # store file info
-    url_path = url_for("get_file", owner=user.username, filename=filename)[1:]
-    public = request.form.get("public") == "true"
-    files[filename] = File(filename, datetime.datetime.now(), size, public)
+
+@app.route(config.prefix + "/upload-chunk", methods=["POST"])
+def upload_chunk():
+    user = get_user()
+    if user.username not in fileuploads:
+        abort_fileupload(user)
+        return abort(404)
+    upload = fileuploads[user.username]
+    id = request.args.get("id", default=-1, type=int)
+    if upload.id != id:
+        abort_fileupload(user)
+        return abort(404)
+    chunk_num = request.args.get("cn", default=-1, type=int)
+    if not 0 <= chunk_num < len(upload.received_chunks):
+        abort_fileupload(user)
+        return abort(400)
+    chunk = request.data
+    if len(chunk) > config.upload_chunk_size:
+        abort_fileupload(user)
+        return abort(400)
+    chunk_path = os.path.join("media", user.username, "temp", upload.filename)
+    with open(chunk_path, "r+b") as f:
+        f.seek(chunk_num * config.upload_chunk_size)
+        f.write(chunk)
+    upload.received_chunks[chunk_num] = True
+    if all(upload.received_chunks):
+        real_file_path = os.path.join("media", user.username, upload.filename)
+        if os.path.exists(real_file_path):
+            os.remove(real_file_path)
+        os.rename(chunk_path, real_file_path)
+        files = get_user_files(user.username)
+        files[upload.filename] = File(
+            upload.filename, datetime.datetime.now(), upload.size, upload.public
+        )
+        del fileuploads[user.username]
     return "ok"
+
+
+next_id = 0
+
+
+@app.route(config.prefix + "/init-upload", methods=["POST"])
+def init_upload():
+    global next_id
+    user = get_user()
+    upload_size = int(request.form.get("size"))
+    filename = secure_filename(request.form.get("filename"))
+    if len(filename) == 0 or filename == "temp":
+        return abort(400, "Invalid filename")
+    public = request.form.get("public") == "true"
+    files = get_user_files(user.username)
+    bonus = 0
+    if filename in files:
+        bonus = files[filename].size
+    remaining_storage = user.dedicated_storage - get_folder_size(files) + bonus
+    if remaining_storage < upload_size:
+        return abort(413)
+    # stop any previous uploads
+    abort_fileupload(user)
+    id = next_id = next_id + 1
+    temp_path = os.path.join("media", user.username, "temp")
+    os.makedirs(temp_path, exist_ok=True)
+    if not os.path.exists(os.path.join(temp_path, filename)):
+        open(os.path.join(temp_path, filename), "w").close()
+
+    fileuploads[user.username] = Fileupload(
+        id,
+        filename,
+        upload_size,
+        public,
+        [False]
+        * ((upload_size + config.upload_chunk_size - 1) // config.upload_chunk_size),
+    )
+    return {"chunkSize": config.upload_chunk_size, "uploadId": id}
 
 
 @app.route(config.prefix + "/update_public", methods=["PUT"])
