@@ -1,5 +1,5 @@
 function usernameInput(id) {
-    const input = document.getElementById(name);
+    const input = document.getElementById(id);
     input.addEventListener("input", () => {
         const allowed = "abcdefghijklmnopqrstuvwxyz0123456789_-";
         const value = input.value.toLowerCase();
