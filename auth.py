@@ -27,7 +27,7 @@ import config
 from apscheduler.schedulers.background import BackgroundScheduler
 
 auth_cookie_name = "mediaauth"
-default_storage = 5 * 1024 * 1024 * 1024
+default_storage = 5 * config.GB
 
 
 auth = Blueprint("auth", __name__)

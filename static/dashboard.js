@@ -101,10 +101,11 @@ const postFixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
 function filesizeToString(size) {
     let i = 0;
-    while (size > 1024 && i < postFixes.length - 1) {
-        size /= 1024;
+    while (size > 1000 && i < postFixes.length - 1) {
+        size /= 1000;
         i++;
     }
+    console.log(size);
     return `${size.toFixed(1)} ${postFixes[i]}`;
 }
 
@@ -113,7 +114,7 @@ function stringToFilesize(str) {
     const num = parseFloat(str);
     for (let i = postFixes.length - 1; i >= 0; i--) {
         if (str.endsWith(postFixes[i])) {
-            return num * Math.pow(1024, i);
+            return num * Math.pow(1000, i);
         }
     }
     return num;

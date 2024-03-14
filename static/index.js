@@ -220,8 +220,8 @@ const postFixes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
 function filesizeToString(size) {
     let i = 0;
-    while (size > 1024 && i < postFixes.length - 1) {
-        size /= 1024;
+    while (size > 1000 && i < postFixes.length - 1) {
+        size /= 1000;
         i++;
     }
     return `${size.toFixed(1)} ${postFixes[i]}`;
