@@ -265,7 +265,7 @@ def set_allocated_storage(username, storage):
     if username in users:
         with users:
             user = users[username]
-            user.data.dedicated_storage = int(storage)
+            user.data.dedicated_storage = int(float(storage))
 
     return "ok"
 
@@ -292,7 +292,7 @@ def create_register_link():
     expires = datetime.datetime.now() + datetime.timedelta(
         days=config.register_key_expiry_days
     )
-    storage = int(request.form.get("storage"))
+    storage = int(float(request.form.get("storage")))
     register_keys[key] = RegisterKey(key, expires, storage)
     return url_for("auth.register_page", register_key=key)
 

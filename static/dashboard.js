@@ -105,7 +105,6 @@ function filesizeToString(size) {
         size /= 1000;
         i++;
     }
-    console.log(size);
     return `${size.toFixed(1)} ${postFixes[i]}`;
 }
 
