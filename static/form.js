@@ -10,7 +10,7 @@ function usernameInput(id) {
         if (input.value !== newValue) {
             const selection = [input.selectionStart, input.selectionEnd];
             input.value = newValue;
-            input.setSelectionRange(selection[0] - 1, selection[1] - 1);
+            input.setSelectionRange(selection[0], selection[1]);
         }
     });
     return requiredInput(id);
